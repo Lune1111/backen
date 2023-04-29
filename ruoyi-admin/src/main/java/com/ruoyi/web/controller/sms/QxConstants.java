@@ -7,15 +7,15 @@ public class QxConstants {
         /**
          * 短信 appid
          */
-        public static final String SMSAPPID="1400812761";
+        public static final String SMSAPPID="";
         /**
          * 腾讯云账户密钥对: secretId
          */
-        public static final String SMSSECREID="AKIDpaM7sHWYMxPdcWQGxV134sdeSIuUBoGZ";
+        public static final String SMSSECREID="";
         /**
          * 腾讯云账户密钥对: secretKey
          */
-        public static final String SMSSECREKEY="DKI8vlXBbnkU1JOQCk7IFzU1WGpCPN9o";
+        public static final String SMSSECREKEY="";
         /**
          * SmsSdkAppid
          */
