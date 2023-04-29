@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.app.mapper.QxInvitationMapper">
+
+    <resultMap type="QxInvitation" id="QxInvitationResult">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="content" column="content"/>
+        <result property="praiseNumber" column="praise_number"/>
+        <result property="commentNumber" column="comment_number"/>
+        <result property="subject" column="subject"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+    <resultMap type="QxInvitationVo" id="QxInvitationResultVo">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="content" column="content"/>
+        <result property="praiseNumber" column="praise_number"/>
+        <result property="commentNumber" column="comment_number"/>
+        <result property="subject" column="subject"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="islike" column="islike"/>
+        <result property="isReport" column="isReport"/>
+        <association property="qxUser" javaType="QxUser" autoMapping="true">
+            <id column="UserId" property="id"></id>
+        </association>
+    </resultMap>
+
+    <sql id="selectQxInvitationVo">
+        select id, user_id, content, praise_number, subject, create_by, create_time, update_by, update_time, remark, deleted,comment_number from qx_invitation
+    </sql>
+    <select id="selectQxInVo" parameterType="QxInvitationVo" resultMap="QxInvitationResultVo">
+        SELECT
+        i.*,
+        u.nick_name,
+        u.sex,
+        u.area,
+        u.avatar,
+        u.id,
+        qx_likes.id islike,
+        qx_report.user_id isReport
+        FROM
+        qx_user u
+        INNER JOIN qx_invitation i ON u.id = i.user_id
+        LEFT JOIN qx_likes ON qx_likes.father_id = i.id
+        AND qx_likes.type = '1' and qx_likes.deleted=0
+        <if test="userId!=null">AND qx_likes.user_id = #{userId}</if>
+        left join qx_report
+        on i.id = qx_report.father_id and qx_report.type='1' and qx_report.deleted='0'
+        <if test="userId!=null">AND qx_report.user_id = #{userId}</if>
+        <where>
+            <if test="qxUser!=null">
+                <if test="qxUser.area!=null">
+                    and u.area=#{qxUser.area}
+                </if>
+            </if>
+            <if test="othersId!=null">and i.user_id=#{othersId}</if>
+            <if test="likeId!=null">and i.user_id =#{likeId}</if>
+            <if test="id != null">and i.id = #{id}</if>
+            <if test="deleted == null">and i.deleted = 0</if>
+        </where>
+        order by i.id desc
+    </select>
+    <select id="selectQxInLike" parameterType="QxInvitationVo" resultMap="QxInvitationResultVo">
+           SELECT
+        i.*,
+        u.nick_name,
+        u.sex,
+        u.area,
+        u.avatar,
+        qx_likes.id islike
+        FROM
+        qx_user u
+        INNER JOIN qx_invitation i ON u.id = i.user_id
+        left join qx_likes on qx_likes.father_id = i.id and qx_likes.type= '1' and qx_likes.deleted='0'
+				and qx_likes.user_id =#{likeId}
+				where  qx_likes.user_id =#{likeId}
+        <if test="deleted == null">and qx_likes.deleted = 0</if>
+        <if test="deleted != null">and qx_likes.deleted = 0</if>
+
+    </select>
+
+    <select id="selectQxInvitationList" parameterType="QxInvitation" resultMap="QxInvitationResult">
+        <include refid="selectQxInvitationVo"/>
+        <where>
+            <if test="userId != null ">and user_id = #{userId}</if>
+            <if test="content != null  and content != ''">and content = #{content}</if>
+            <if test="praiseNumber != null ">and praise_number = #{praiseNumber}</if>
+            <if test="subject != null  and subject != ''">and subject = #{subject}</if>
+            <if test="deleted != null">and deleted = 0</if>
+            <if test="deleted == null">and deleted = 0</if>
+        </where>
+    </select>
+    <delete id="verifyDelete">
+        delete from qx_invitation where id in (
+        <foreach collection="list" item="list" separator=",">
+            #{list.id}
+        </foreach>
+        )
+    </delete>
+</mapper>

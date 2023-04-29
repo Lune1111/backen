@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.app.mapper.QxUserMapper">
+    
+    <resultMap type="QxUser" id="QxUserResult">
+        <result property="id"    column="id"    />
+        <result property="phone"    column="phone"    />
+        <result property="password"    column="password"    />
+        <result property="nickName"    column="nick_name"    />
+        <result property="sex"    column="sex"    />
+        <result property="birthday"    column="birthday"    />
+        <result property="area"    column="area"    />
+        <result property="intro"    column="intro"    />
+        <result property="avatar"    column="avatar"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="deleted"    column="deleted"    />
+        <result property="status"    column="status"    />
+    </resultMap>
+
+    <sql id="selectQxUserVo">
+        select id, phone, password, nick_name, sex, birthday, area, intro, avatar, create_by, create_time, update_by, update_time, remark, deleted ,status from qx_user
+    </sql>
+
+    <select id="selectQxUserList" parameterType="QxUser" resultMap="QxUserResult">
+        <include refid="selectQxUserVo"/>
+        <where>
+            <if test="phone != null  and phone != ''"> and phone like concat('%',#{phone},'%')</if>
+            <if test="password != null  and password != ''"> and password = #{password}</if>
+            <if test="nickName != null  and nickName != ''"> and nick_name like concat('%',#{nickName},'%')</if>
+            <if test="sex != null  and sex != ''"> and sex like concat('%',#{sex},'%')</if>
+            <if test="birthday != null "> and birthday like concat('%',#{birthday},'%')</if>
+            <if test="area != null  and area != ''"> and area like concat('%',#{area},'%')</if>
+            <if test="intro != null  and intro != ''"> and intro = #{intro}</if>
+            <if test="avatar != null  and avatar != ''"> and avatar = #{avatar}</if>
+            <if test="deleted != null">and deleted = #{deleted}</if>
+            <if test="deleted == null">and deleted = 0</if>
+        </where>
+    </select>
+    <select id="selectLikeQxUserList" resultType="com.ruoyi.common.core.domain.app.QxUser">
+        SELECT * from qx_user where username like concat('%',#{username},'%')
+        <choose>
+            <when test="phone != null">
+                 and phone like concat('%',#{phone},'%')
+            </when>
+            <when test="password != null">
+                and password like concat('%',#{password},'%')
+            </when>
+            <when test="nickName != null">
+                and nickName like concat('%',#{nickName},'%')
+            </when>
+            <when test="sex != null">
+                and sex like concat('%',#{sex},'%')
+            </when>
+            <when test="birthday != null">
+                and birthday like concat('%',#{birthday},'%')
+            </when>
+            <when test="area != null">
+                and area like concat('%',#{area},'%')
+            </when>
+            <when test="intro != null">
+                and intro like concat('%',#{intro},'%')
+            </when>
+            <when test="avatar != null">
+                and avatar like concat('%',#{avatar},'%')
+            </when>
+        </choose>
+    </select>
+
+
+</mapper>

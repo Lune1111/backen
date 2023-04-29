@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.app.mapper.QxRelationMapper">
+
+    <resultMap type="QxRelation" id="QxRelationResult">
+        <result property="fromId" column="from_id"/>
+        <result property="toId" column="to_id"/>
+        <result property="type" column="type"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <resultMap type="QxRelationVO" id="QxRelationResultVO">
+        <result property="fromId" column="from_id"/>
+        <result property="toId" column="to_id"/>
+        <result property="deleted" column="deleted"/>
+        <result property="type" column="type"/>
+        <result property="relation" column="relation"/>
+        <association property="qxUser">
+            <result property="nickName" column="nick_name"/>
+            <result property="sex" column="sex"/>
+            <result property="area" column="area"/>
+            <result property="avatar" column="avatar"/>
+        </association>
+    </resultMap>
+
+    <sql id="selectQxRelationVo">
+        SELECT
+            qx_relation.from_id,
+            qx_relation.to_id,
+            qx_relation.deleted,
+            type,
+            nick_name,
+            sex,
+            area,
+            avatar ,b.from_id relation
+        FROM
+            qx_relation left join
+            (select from_id,to_id
+            from qx_relation where deleted=0)b
+            on
+            qx_relation.from_id = b.to_id
+            and
+            qx_relation.to_id = b.from_id,qx_user
+    </sql>
+
+    <select id="selectQxRelationList" parameterType="QxRelation" resultMap="QxRelationResultVO">
+        <include refid="selectQxRelationVo"/>
+        <where>
+            <if test="fromId != null ">qx_relation.to_id=qx_user.id</if>
+            <if test="toId != null ">qx_relation.from_id=qx_user.id</if>
+            <if test="qxUser.nickName != '' and qxUser.nickName != null "> and qx_user.nick_name like concat('%',#{qxUser.nickName},'%')</if>
+            <if test="fromId != null "> and qx_relation.from_id = #{fromId}</if>
+            <if test="toId != null "> and qx_relation.to_id = #{toId}</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+            <if test="deleted == null">and qx_relation.deleted = 0</if>
+        </where>
+    </select>
+
+    <update id="verifyUpdate" parameterType="QxRelation">
+        update qx_relation set
+        <if test="deleted == 0 "> deleted = '1'</if>
+        <if test="deleted == 1 "> deleted = '0'</if>
+        where from_id = #{fromId}
+        and to_id = #{toId}
+        and type = #{type}
+    </update>
+
+    <select id="selectIsEmpty" parameterType="QxRelation" resultMap="QxRelationResult">
+        select from_id, to_id,deleted,type
+        from qx_relation
+        <where>
+            <if test="fromId != null "> and from_id = #{fromId}</if>
+            <if test="toId != null "> and to_id = #{toId}</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+        </where>
+    </select>
+
+</mapper>

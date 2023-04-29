@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.app.mapper.QxCommentMapper">
+
+    <resultMap type="QxComment" id="QxCommentResult">
+        <result property="id" column="id"/>
+        <result property="parentId" column="parent_id"/>
+    </resultMap>
+    <resultMap type="QxCommentVO" id="QxCommentResultVO">
+        <result property="id" column="id"/>
+        <result property="replyUserId" column="reply_user_id"/>
+        <result property="invitationId" column="invitation_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="avatar" column="avatar"/>
+        <result property="content" column="content"/>
+        <result property="createTime" column="create_time"/>
+        <result property="praiseNumber" column="praise_number"/>
+        <result property="deleted" column="deleted"/>
+        <result property="nickName" column="nick_name"/>
+        <result property="replyName" column="reply_name"/>
+        <result property="isLike" column="isLike"/>
+        <result property="isReport" column="isReport"/>
+    </resultMap>
+
+    <sql id="selectQxCommentVo">
+      select qx_comment.id,qx_comment.user_id,invitation_id,parent_id,qx_comment.content,qx_comment.praise_number,qx_comment.deleted,qx_comment.reply_user_id,qx_comment.create_time,
+      nick_name,a.reply_name,avatar,
+      qx_likes.id isLike,
+      qx_report.user_id isReport
+    from
+    qx_invitation
+    inner join qx_comment
+    on qx_invitation.id = qx_comment.invitation_id
+    left join qx_likes
+    on qx_comment.id = qx_likes.father_id and qx_likes.type='2' and qx_likes.deleted='0'
+    left join qx_report
+    on qx_comment.id = qx_report.father_id and qx_report.type='2' and qx_report.deleted='0'
+    <if test="userId!=null">AND qx_report.user_id = #{userId}</if>
+    left join qx_user
+    on qx_comment.user_id=qx_user.id
+    left join (select qx_comment.id,qx.qx_user.id user_id,qx_user.nick_name reply_name from qx_comment,qx_user where qx.qx_comment.reply_user_id=qx.qx_user.id ) a
+    on a.user_id=qx.qx_comment.reply_user_id and qx_comment.id= a.id
+    </sql>
+    <select id="selectQxCommentList" parameterType="QxComment" resultMap="QxCommentResultVO">
+        <include refid="selectQxCommentVo"/>
+        <where>
+            <if test="invitationId != null "> and invitation_id = #{invitationId}</if>
+            <if test="deleted != null "> and qx_comment.deleted = #{deleted}</if>
+        </where>
+    </select>
+
+    <delete id="deleteByList">
+        delete from qx_comment where id in (
+        <foreach collection="list" item="list" separator=",">
+            #{list.id}
+        </foreach>
+        )
+    </delete>
+    <sql id="selectQxComment">
+        select id, parent_id from qx_comment
+    </sql>
+
+    <select id="selectQxComment" parameterType="QxComment" resultMap="QxCommentResult">
+        <include refid="selectQxComment"/>
+        <where>
+            <if test="deleted != null">and deleted = #{deleted}</if>
+        </where>
+    </select>
+
+</mapper>
